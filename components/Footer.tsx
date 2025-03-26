@@ -67,8 +67,7 @@ const Footer = () => {
           className="mt-8">
           <hr className="h-0.5 bg-gray-700 border-0" />
           <p className="text-center text-gray-400 text-sm pt-4">
-            &copy; {new Date().getFullYear()} Medical Clinic. All rights
-            reserved.
+            &copy; {new Date().getFullYear()} PulseConnect. All rights reserved.
           </p>
         </motion.div>
       </motion.footer>
