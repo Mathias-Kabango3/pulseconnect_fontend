@@ -27,8 +27,7 @@ const Navbar = () => {
             alt="logo"
             className="w-12 h-12 rounded-full bg-[#192655]"
           />
-          <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-500 to-cyan-400 text-transparent bg-clip-text">
-            {" "}
+          <h1 className="text-2xl hidden md:block lg:text-3xl font-bold bg-gradient-to-r from-blue-500 to-cyan-400 text-transparent bg-clip-text">
             PulseConnect
           </h1>
         </Link>
