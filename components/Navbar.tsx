@@ -12,9 +12,9 @@ const Navbar = () => {
 
   const menuLinks = [
     { href: "/", label: "Home" },
-    { href: "/doctors", label: "Doctors" },
-    { href: "/services", label: "Services" },
-    { href: "/contact", label: "Contact" },
+    { href: "#doctorS", label: "Doctors" },
+    { href: "/", label: "Services" },
+    { href: "/", label: "Contact" },
   ];
 
   return (

@@ -4,7 +4,7 @@ import Image from "next/image";
 
 const TopDoctors = () => {
   return (
-    <section>
+    <section id="doctorS">
       <h2 className="text-center font-semibold my-6 text-2xl">
         Meet out Great Doctors
       </h2>

@@ -55,7 +55,7 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-2">Get In Touch</h3>
             <p className="text-gray-300">Need help with your appointment?</p>
             <p className="text-gray-300 mt-2">+263 89347 7454</p>
-            <p className="text-gray-300">📧 support@medicalclinic.com</p>
+            <p className="text-gray-300">📧 support@pulseconnect.com</p>
           </motion.div>
         </div>
 

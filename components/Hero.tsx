@@ -37,9 +37,9 @@ const Banner = () => {
             Connect with your doctor and schedule a check-up
           </h1>
           <p className="mt-8 text-[#787878] font-medium text-sm">
-            With Medicare services, you will receive the best medical treatment
-            at home. Our skilled professionals ensure top-notch care tailored to
-            your needs.
+            With PulseConnect services, you will receive the best medical
+            treatment at home. Our skilled professionals ensure top-notch care
+            tailored to your needs.
           </p>
 
           {/* Animated Button */}
