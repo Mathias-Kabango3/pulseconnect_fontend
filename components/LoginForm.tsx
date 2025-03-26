@@ -18,11 +18,22 @@ const SubmitButton = () => {
       whileTap={{ scale: 0.95 }}>
       {pending ? (
         <svg
-          aria-hidden="true"
-          className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600 mx-auto"
-          viewBox="0 0 100 101"
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-6 h-6 flex items-center mx-auto text-white animate-spin"
+          viewBox="0 0 24 24"
           fill="none"
-          xmlns="http://www.w3.org/2000/svg">
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round">
+          <path d="M12 2v4" />
+          <path d="m16.2 7.8 2.9-2.9" />
+          <path d="M18 12h4" />
+          <path d="m16.2 16.2 2.9 2.9" />
+          <path d="M12 18v4" />
+          <path d="m4.9 19.1 2.9-2.9" />
+          <path d="M2 12h4" />
+          <path d="m4.9 4.9 2.9 2.9" />
         </svg>
       ) : (
         "Login"
