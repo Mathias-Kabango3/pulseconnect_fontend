@@ -1,10 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Doctor } from "@/types/doctor";
 import { getDoctor, getSlots, bookAppointment } from "@/services/actions";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 
 interface Slots {
   startTime: string;
@@ -14,6 +15,7 @@ interface Slots {
 const DoctorBooking = () => {
   const { user } = useAuth();
   const params = useParams();
+  const router = useRouter();
   const doctorId = params.id as string;
 
   const [doctor, setDoctor] = useState<Doctor | null>(null);
@@ -76,7 +78,7 @@ const DoctorBooking = () => {
     e.preventDefault();
 
     if (!formData.slot) {
-      alert("Please select a time slot.");
+      toast.error("Please select a time slot.");
       return;
     }
 
@@ -94,12 +96,30 @@ const DoctorBooking = () => {
 
       if (!res.message) throw new Error("Failed to book appointment");
 
-      alert("Appointment booked successfully!");
+      // Show success toast with navigation options
+      toast.success(
+        <div>
+          <p className="font-semibold">Appointment booked successfully!</p>
+          <div className="flex gap-2 mt-2">
+            <button
+              onClick={() => router.push(`patients/doctors/`)}
+              className="text-sm bg-blue-100 text-blue-600 px-3 py-1 rounded hover:bg-blue-200 transition">
+              Back to Doctor
+            </button>
+            <button
+              onClick={() => router.push("/patients/appointments")}
+              className="text-sm bg-purple-100 text-purple-600 px-3 py-1 rounded hover:bg-purple-200 transition">
+              View Appointments
+            </button>
+          </div>
+        </div>
+      );
+
       setFormData({ date: "", slot: "" });
       setSlots([]);
     } catch (error) {
       console.error(error);
-      alert("Error booking appointment");
+      toast.error("Error booking appointment. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -136,6 +156,7 @@ const DoctorBooking = () => {
                 value={formData.date}
                 onChange={handleChange}
                 required
+                min={new Date().toISOString().split("T")[0]} // Disable past dates
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
               />
             </div>
@@ -155,6 +176,8 @@ const DoctorBooking = () => {
                 <option value="">Select a time slot</option>
                 {loadingSlots ? (
                   <option disabled>Loading slots...</option>
+                ) : slots.length === 0 && formData.date ? (
+                  <option disabled>No slots available for this date</option>
                 ) : (
                   slots.map((slot) => (
                     <option key={slot.startTime} value={slot.startTime}>
