@@ -35,22 +35,58 @@ export const loginAction = async (formData: FormData) => {
 
 export const registerAction = async (formData: FormData) => {
   try {
+    // Extract required fields from formData
+    const firstName = formData.get('firstName') as string;
+    const lastName = formData.get('lastName') as string;
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    const gender = formData.get('gender') as string;
+    const image = formData.get('image') as File | null;
+
+    // Validate required fields
+    if (!firstName || !lastName || !email || !password || !gender) {
+      return { error: "All required fields must be provided" };
+    }
+
+    // Create a new FormData object with only the fields we want to send
+    const cleanFormData = new FormData();
+    cleanFormData.append('firstName', firstName);
+    cleanFormData.append('lastName', lastName);
+    cleanFormData.append('email', email);
+    cleanFormData.append('password', password);
+    cleanFormData.append('gender', gender);
+
+    // Only append image if it exists and has content
+    if (image && image.size > 0 && image.name !== 'undefined') {
+      cleanFormData.append('image', image);
+    }
+
     const response = await fetch(`${apiUrl}/patient/register`, {
       method: "POST",
-      body: formData,
+      body: cleanFormData,
     });
 
     if (!response.ok) {
       const error = await response.json();
-      return { error: error.message || "Sorry something went wrong" };
+      return {
+        error: error.message || "Registration failed. Please try again.",
+      };
     }
+
+    const data = await response.json();
+    return {
+      message: "Registration successful!",
+      user: data.user,
+      accessToken: data.accessToken,
+    };
+
   } catch (err: unknown) {
-    if (err instanceof Error) {
-      throw new Error(err.message || "Sorry something went wrong");
-    }
-    throw new Error(
-      typeof err === "string" ? err : "An unknown error occurred"
-    );
+    console.error("Registration error:", err);
+    return { 
+      error: err instanceof Error 
+        ? err.message 
+        : "An unexpected error occurred during registration" 
+    };
   }
 };
 

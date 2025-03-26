@@ -62,6 +62,8 @@ const RegisterForm = () => {
     const file = e.target.files?.[0];
     if (file) {
       setFileName(file.name);
+    } else {
+      setFileName(null);
     }
   };
 
@@ -99,7 +101,7 @@ const RegisterForm = () => {
         {/* First Name */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            First Name
+            First Name <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -113,7 +115,7 @@ const RegisterForm = () => {
         {/* Last Name */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Last Name
+            Last Name <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -127,7 +129,7 @@ const RegisterForm = () => {
         {/* Email */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Email
+            Email <span className="text-red-500">*</span>
           </label>
           <input
             type="email"
@@ -141,7 +143,7 @@ const RegisterForm = () => {
         {/* Gender */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Gender
+            Gender <span className="text-red-500">*</span>
           </label>
           <select
             name="gender"
@@ -157,7 +159,7 @@ const RegisterForm = () => {
         {/* Password */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Password
+            Password <span className="text-red-500">*</span>
           </label>
           <input
             type="password"
@@ -168,10 +170,10 @@ const RegisterForm = () => {
           />
         </div>
 
-        {/* Profile Picture */}
+        {/* Profile Picture (Optional) */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Profile Picture
+            Profile Picture (Optional)
           </label>
           <div className="relative">
             <input
@@ -183,11 +185,14 @@ const RegisterForm = () => {
             />
             <div className="w-full px-4 py-2 border border-gray-300 rounded-lg flex items-center justify-between bg-white">
               <span className="text-gray-500">
-                {fileName || "Choose a file..."}
+                {fileName || "No file selected"}
               </span>
               <span className="text-blue-600">Browse</span>
             </div>
           </div>
+          <p className="mt-1 text-xs text-gray-500">
+            Upload a profile photo (optional)
+          </p>
         </div>
 
         {/* Submit Button */}
