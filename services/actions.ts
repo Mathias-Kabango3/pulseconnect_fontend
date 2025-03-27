@@ -432,8 +432,8 @@ export const cancleAppointment = async (appId: string) => {
   try {
     const userToken = await cookies();
     const token = userToken.get("token")?.value;
-    const response = await fetch(`${apiUrl}/appointments/${appId}`, {
-      method: "GET",
+    const response = await fetch(`${apiUrl}/appointment/${appId}`, {
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
