@@ -24,24 +24,21 @@ export const loginAction = async (formData: FormData) => {
     const responseData = await response.json();
     return responseData;
   } catch (err: unknown) {
-    if (err instanceof Error) {
-      throw new Error(err.message || "Sorry something went wrong");
-    }
-    throw new Error(
-      typeof err === "string" ? err : "An unknown error occurred"
-    );
+    return {
+      error: err instanceof Error ? err.message : "Something went wrong",
+    };
   }
 };
 
 export const registerAction = async (formData: FormData) => {
   try {
     // Extract required fields from formData
-    const firstName = formData.get('firstName') as string;
-    const lastName = formData.get('lastName') as string;
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-    const gender = formData.get('gender') as string;
-    const image = formData.get('image') as File | null;
+    const firstName = formData.get("firstName") as string;
+    const lastName = formData.get("lastName") as string;
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const gender = formData.get("gender") as string;
+    const image = formData.get("image") as File | null;
 
     // Validate required fields
     if (!firstName || !lastName || !email || !password || !gender) {
@@ -50,15 +47,15 @@ export const registerAction = async (formData: FormData) => {
 
     // Create a new FormData object with only the fields we want to send
     const cleanFormData = new FormData();
-    cleanFormData.append('firstName', firstName);
-    cleanFormData.append('lastName', lastName);
-    cleanFormData.append('email', email);
-    cleanFormData.append('password', password);
-    cleanFormData.append('gender', gender);
+    cleanFormData.append("firstName", firstName);
+    cleanFormData.append("lastName", lastName);
+    cleanFormData.append("email", email);
+    cleanFormData.append("password", password);
+    cleanFormData.append("gender", gender);
 
     // Only append image if it exists and has content
-    if (image && image.size > 0 && image.name !== 'undefined') {
-      cleanFormData.append('image', image);
+    if (image && image.size > 0 && image.name !== "undefined") {
+      cleanFormData.append("image", image);
     }
 
     const response = await fetch(`${apiUrl}/patient/register`, {
@@ -79,60 +76,79 @@ export const registerAction = async (formData: FormData) => {
       user: data.user,
       accessToken: data.accessToken,
     };
-
   } catch (err: unknown) {
-    console.error("Registration error:", err);
-    return { 
-      error: err instanceof Error 
-        ? err.message 
-        : "An unexpected error occurred during registration" 
+    return {
+      error:
+        err instanceof Error
+          ? err.message
+          : "An unexpected error occurred during registration",
     };
   }
 };
 
 export const getAllAppointments = async () => {
-  const adminCookie = await cookies();
-  const adminToken = adminCookie.get("token")?.value;
-  if (!adminToken) {
-    throw new Error("Unauthorized");
-  }
-  const response = await fetch(`${apiUrl}/admin`, {
-    method: "GET",
-    cache: "no-store",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${adminToken}`,
-    },
-  });
+  try {
+    const adminCookie = await cookies();
+    const adminToken = adminCookie.get("token")?.value;
+    if (!adminToken) {
+      throw new Error("Unauthorized");
+    }
+    const response = await fetch(`${apiUrl}/admin`, {
+      method: "GET",
+      cache: "no-store",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${adminToken}`,
+      },
+    });
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch patients");
-  }
+    if (!response.ok) {
+      const error = await response.json();
+      return { error: error.message || "Sorry something went wrong" };
+    }
 
-  return response.json();
+    return response.json();
+  } catch (err: unknown) {
+    return {
+      error: err instanceof Error ? err.message : "Something went wrong",
+    };
+  }
 };
 
 // get all doctors across all hospitals
 
 export const getDoctors = async () => {
-  const userToken = await cookies();
-  const token = userToken.get("token")?.value;
-  const response = await fetch(`${apiUrl}/doctor`, {
-    method: "GET",
-    cache: "no-store",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  if (!response.ok) {
-    const errorMessage = await response.json();
-    throw new Error(errorMessage.message || "Failed to fetch doctors");
+  try {
+    const userToken = await cookies();
+    const token = userToken.get("token")?.value;
+    const response = await fetch(`${apiUrl}/doctor`, {
+      method: "GET",
+      cache: "no-store",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      return { error: error.message || "Sorry something went wrong" };
+    }
+
+    return await response.json();
+  } catch (err: unknown) {
+    return {
+      error: err instanceof Error ? err.message : "Something went wrong",
+    };
   }
-  return await response.json();
 };
 
 export const getDoctor = async (id: string) => {
+  try {
+  } catch (err: unknown) {
+    return {
+      error: err instanceof Error ? err.message : "Something went wrong",
+    };
+  }
   const userToken = await cookies();
   const token = userToken.get("token")?.value;
   const response = await fetch(`${apiUrl}/doctor/${id}`, {
@@ -143,29 +159,36 @@ export const getDoctor = async (id: string) => {
     },
   });
   if (!response.ok) {
-    throw new Error("Failed to fetch doctors");
+    const error = await response.json();
+    return { error: error.message || "Sorry something went wrong" };
   }
   return response.json();
 };
 
 export const getSlots = async (date: string, docId: string) => {
-  const userToken = await cookies();
-  const token = userToken.get("token")?.value;
-  const response = await fetch(
-    `${apiUrl}/appointment/slots/?doctorId=${docId}&date=${date}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+  try {
+    const userToken = await cookies();
+    const token = userToken.get("token")?.value;
+    const response = await fetch(
+      `${apiUrl}/appointment/slots/?doctorId=${docId}&date=${date}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    if (!response.ok) {
+      const error = await response.json();
+      return { error: error.message || "Sorry something went wrong" };
     }
-  );
-  if (!response.ok) {
-    const errorMessage = await response.json();
-    throw new Error(errorMessage.message || "Failed to fetch slots");
+    return response.json();
+  } catch (err: unknown) {
+    return {
+      error: err instanceof Error ? err.message : "Something went wrong",
+    };
   }
-  return response.json();
 };
 
 export const bookAppointment = async (
@@ -197,9 +220,10 @@ export const bookAppointment = async (
     }
     const res = await response.json();
     return res;
-  } catch (error) {
-    console.log(error);
-    throw new Error("Failed to book Appointment.");
+  } catch (err: unknown) {
+    return {
+      error: err instanceof Error ? err.message : "Something went wrong",
+    };
   }
 };
 
@@ -223,9 +247,10 @@ export const fetchAppointments = async (userId: string) => {
     }
     const data = await response.json();
     return data;
-  } catch (error) {
-    console.log(error);
-    throw new Error("Failed to fetch appointments");
+  } catch (err: unknown) {
+    return {
+      error: err instanceof Error ? err.message : "Something went wrong",
+    };
   }
 };
 
@@ -248,12 +273,9 @@ export const registerDoctor = async (formData: FormData) => {
     revalidatePath("/admin/doctors");
     return await response.json();
   } catch (err: unknown) {
-    if (err instanceof Error) {
-      throw new Error(err.message || "Sorry something went wrong");
-    }
-    throw new Error(
-      typeof err === "string" ? err : "An unknown error occurred"
-    );
+    return {
+      error: err instanceof Error ? err.message : "Something went wrong",
+    };
   }
 };
 
@@ -275,12 +297,9 @@ export const hospitalDoctors = async () => {
     const responseData = await response.json();
     return responseData.doctors;
   } catch (err: unknown) {
-    if (err instanceof Error) {
-      throw new Error(err.message || "Sorry something went wrong");
-    }
-    throw new Error(
-      typeof err === "string" ? err : "An unknown error occurred"
-    );
+    return {
+      error: err instanceof Error ? err.message : "Something went wrong",
+    };
   }
 };
 
@@ -302,12 +321,9 @@ export const doctorsAppointments = async (doctorId: string) => {
     const responseData = await response.json();
     return responseData.appointments;
   } catch (err: unknown) {
-    if (err instanceof Error) {
-      throw new Error(err.message || "Sorry something went wrong");
-    }
-    throw new Error(
-      typeof err === "string" ? err : "An unknown error occurred"
-    );
+    return {
+      error: err instanceof Error ? err.message : "Something went wrong",
+    };
   }
 };
 
@@ -336,12 +352,9 @@ export const updateDoctor = async (formData: FormData, doctorId: string) => {
     revalidatePath("/admin/doctors");
     return await response.json();
   } catch (err: unknown) {
-    if (err instanceof Error) {
-      throw new Error(err.message || "Sorry something went wrong");
-    }
-    throw new Error(
-      typeof err === "string" ? err : "An unknown error occurred"
-    );
+    return {
+      error: err instanceof Error ? err.message : "Something went wrong",
+    };
   }
 };
 
@@ -363,12 +376,9 @@ export const deleteDoctor = async (doctorId: string) => {
     revalidatePath("/admin/doctors");
     return await response.json();
   } catch (err: unknown) {
-    if (err instanceof Error) {
-      throw new Error(err.message || "Sorry something went wrong");
-    }
-    throw new Error(
-      typeof err === "string" ? err : "An unknown error occurred"
-    );
+    return {
+      error: err instanceof Error ? err.message : "Something went wrong",
+    };
   }
 };
 
@@ -389,12 +399,9 @@ export const getDoctorsAppointments = async (doctorId: string) => {
     }
     return await response.json();
   } catch (err: unknown) {
-    if (err instanceof Error) {
-      throw new Error(err.message || "Sorry something went wrong");
-    }
-    throw new Error(
-      typeof err === "string" ? err : "An unknown error occurred"
-    );
+    return {
+      error: err instanceof Error ? err.message : "Something went wrong",
+    };
   }
 };
 
@@ -415,11 +422,34 @@ export const getHospitalPatients = async () => {
     }
     return await response.json();
   } catch (err: unknown) {
-    if (err instanceof Error) {
-      throw new Error(err.message || "Sorry something went wrong");
+    return {
+      error: err instanceof Error ? err.message : "Something went wrong",
+    };
+  }
+};
+
+export const cancleAppointment = async (appId: string) => {
+  try {
+    const userToken = await cookies();
+    const token = userToken.get("token")?.value;
+    const response = await fetch(`${apiUrl}/appointments/${appId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        newStatus: "Canceled",
+      }),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      return { error: error.message || "Failed to cancel appointment." };
     }
-    throw new Error(
-      typeof err === "string" ? err : "An unknown error occurred"
-    );
+    return await response.json();
+  } catch (err: unknown) {
+    return {
+      error: err instanceof Error ? err.message : "Something went wrong",
+    };
   }
 };
