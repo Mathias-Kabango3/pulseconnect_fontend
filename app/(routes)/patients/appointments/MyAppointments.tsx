@@ -44,7 +44,8 @@ const MyAppointments = () => {
   }, [user?.id]);
 
   const changeAppointmentStatus = async (appId: string) => {
-    const response = await cancleAppointment(appId as string);
+    console.log(appId);
+    const response = await cancleAppointment(appId);
     if (response?.error) {
       setError(response.error);
     } else {
@@ -210,7 +211,9 @@ const MyAppointments = () => {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => changeAppointmentStatus(appointment.id)}
+                    onClick={() => {
+                      changeAppointmentStatus(appointment.id);
+                    }}
                     className="px-6 py-2 border-2 border-red-500 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-colors duration-300">
                     Cancel Appointment
                   </motion.button>

@@ -439,7 +439,7 @@ export const cancleAppointment = async (appId: string) => {
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        newStatus: "Canceled",
+        newStatus: "CANCELLED",
       }),
     });
     if (!response.ok) {
