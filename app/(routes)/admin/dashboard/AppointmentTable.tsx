@@ -38,7 +38,7 @@ const AppointmentTable: React.FC = () => {
     try {
       const adminToken = Cookies.get("token");
       const response = await fetch(
-        `https://pulseconnect-backend.onrender.com/api/v1/appointment/update/${id}`,
+        `https://pulseconnect-backend.onrender.com/api/v1/appointment/${id}`,
         {
           method: "PUT",
           headers: {
