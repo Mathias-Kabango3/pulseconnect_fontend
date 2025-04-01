@@ -95,6 +95,6 @@ This project is licensed under the [MIT License](LICENSE).
 Pull requests are welcome! Please open an issue first to discuss any changes.
 
 ---
-Developed with ❤️ by PulseConnect Team.
+Developed with ❤️ by Mathias Kabango.
 
 
