@@ -3,23 +3,59 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 const apiUrl = process.env.NEXT_APP_API_URL;
 
+export const fetchWithRetries = async (
+  url: string,
+  options: RequestInit = {},
+  retries = 3,
+  delay = 1000
+) => {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const response = await fetch(url, options);
+
+      if (!response.ok) {
+        console.log(`Attempt ${attempt} failed with status ${response.status}`);
+
+        // Retry only on server errors (>= 500) or timeout (504)
+        if (response.status >= 500 || response.status === 504) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+
+        return response; // Don't retry client errors (400-499)
+      }
+
+      return response; // Successful response
+    } catch (err) {
+      console.log(
+        `Network error on attempt ${attempt}, retrying in ${delay}ms...`
+      );
+
+      if (attempt < retries) {
+        await new Promise((res) => setTimeout(res, delay));
+        delay *= 2; // Exponential backoff
+      } else {
+        throw err; // Fail after max retries
+      }
+    }
+  }
+};
+
 // Server Action for login
 export const loginAction = async (formData: FormData) => {
+  const data = {
+    email: formData.get("email"),
+    password: formData.get("password"),
+  };
+
   try {
-    const data = {
-      email: formData.get("email"),
-      password: formData.get("password"),
-    };
-    const response = await fetch(`${apiUrl}/admin/login`, {
+    const response = await fetchWithRetries(`${apiUrl}/admin/login`, {
       method: "POST",
-      headers: {
-        "Content-Type": "Application/json",
-      },
+      headers: { "Content-Type": "Application/json" },
       body: JSON.stringify(data),
     });
-    if (!response.ok) {
-      const error = await response.json();
-      return { error: error.message || "Sorry something went wrong" };
+
+    if (!response) {
+      throw new Error("Response is undefined");
     }
     const responseData = await response.json();
     return responseData;
@@ -32,7 +68,6 @@ export const loginAction = async (formData: FormData) => {
 
 export const registerAction = async (formData: FormData) => {
   try {
-    // Extract required fields from formData
     const firstName = formData.get("firstName") as string;
     const lastName = formData.get("lastName") as string;
     const email = formData.get("email") as string;
@@ -40,12 +75,10 @@ export const registerAction = async (formData: FormData) => {
     const gender = formData.get("gender") as string;
     const image = formData.get("image") as File | null;
 
-    // Validate required fields
     if (!firstName || !lastName || !email || !password || !gender) {
       return { error: "All required fields must be provided" };
     }
 
-    // Create a new FormData object with only the fields we want to send
     const cleanFormData = new FormData();
     cleanFormData.append("firstName", firstName);
     cleanFormData.append("lastName", lastName);
@@ -53,23 +86,18 @@ export const registerAction = async (formData: FormData) => {
     cleanFormData.append("password", password);
     cleanFormData.append("gender", gender);
 
-    // Only append image if it exists and has content
     if (image && image.size > 0 && image.name !== "undefined") {
       cleanFormData.append("image", image);
     }
 
-    const response = await fetch(`${apiUrl}/patient/register`, {
+    const response = await fetchWithRetries(`${apiUrl}/patient/register`, {
       method: "POST",
       body: cleanFormData,
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      return {
-        error: error.message || "Registration failed. Please try again.",
-      };
+    if (!response) {
+      throw new Error("Response is undefined");
     }
-
     const data = await response.json();
     return {
       message: "Registration successful!",
@@ -90,10 +118,9 @@ export const getAllAppointments = async () => {
   try {
     const adminCookie = await cookies();
     const adminToken = adminCookie.get("token")?.value;
-    if (!adminToken) {
-      throw new Error("Unauthorized");
-    }
-    const response = await fetch(`${apiUrl}/admin`, {
+    if (!adminToken) throw new Error("Unauthorized");
+
+    const response = await fetchWithRetries(`${apiUrl}/admin`, {
       method: "GET",
       cache: "no-store",
       headers: {
@@ -101,12 +128,9 @@ export const getAllAppointments = async () => {
         Authorization: `Bearer ${adminToken}`,
       },
     });
-
-    if (!response.ok) {
-      const error = await response.json();
-      return { error: error.message || "Sorry something went wrong" };
+    if (!response) {
+      throw new Error("Response is undefined");
     }
-
     return response.json();
   } catch (err: unknown) {
     return {
@@ -115,13 +139,12 @@ export const getAllAppointments = async () => {
   }
 };
 
-// get all doctors across all hospitals
-
 export const getDoctors = async () => {
   try {
     const userToken = await cookies();
     const token = userToken.get("token")?.value;
-    const response = await fetch(`${apiUrl}/doctor`, {
+
+    const response = await fetchWithRetries(`${apiUrl}/doctor`, {
       method: "GET",
       cache: "no-store",
       headers: {
@@ -129,11 +152,10 @@ export const getDoctors = async () => {
         Authorization: `Bearer ${token}`,
       },
     });
-    if (!response.ok) {
-      const error = await response.json();
-      return { error: error.message || "Sorry something went wrong" };
-    }
 
+    if (!response) {
+      throw new Error("Response is undefined");
+    }
     return await response.json();
   } catch (err: unknown) {
     return {
@@ -144,32 +166,33 @@ export const getDoctors = async () => {
 
 export const getDoctor = async (id: string) => {
   try {
+    const userToken = await cookies();
+    const token = userToken.get("token")?.value;
+
+    const response = await fetchWithRetries(`${apiUrl}/doctor/${id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response) {
+      throw new Error("Response is undefined");
+    }
+    return response.json();
   } catch (err: unknown) {
     return {
       error: err instanceof Error ? err.message : "Something went wrong",
     };
   }
-  const userToken = await cookies();
-  const token = userToken.get("token")?.value;
-  const response = await fetch(`${apiUrl}/doctor/${id}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  if (!response.ok) {
-    const error = await response.json();
-    return { error: error.message || "Sorry something went wrong" };
-  }
-  return response.json();
 };
 
 export const getSlots = async (date: string, docId: string) => {
   try {
     const userToken = await cookies();
     const token = userToken.get("token")?.value;
-    const response = await fetch(
+
+    const response = await fetchWithRetries(
       `${apiUrl}/appointment/slots/?doctorId=${docId}&date=${date}`,
       {
         method: "GET",
@@ -179,9 +202,8 @@ export const getSlots = async (date: string, docId: string) => {
         },
       }
     );
-    if (!response.ok) {
-      const error = await response.json();
-      return { error: error.message || "Sorry something went wrong" };
+    if (!response) {
+      throw new Error("Response is undefined");
     }
     return response.json();
   } catch (err: unknown) {
